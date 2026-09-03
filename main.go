@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
+	"time"
 )
 
 // THE LEXER : token converter of the prohram
@@ -105,4 +108,39 @@ func tokenise(source string) []Token {
 
 func main() {
 	fmt.Println("Welcome to the world of MoLang(.mo)")
+	// Read the file path and parse them and pass to tokenise function
+	// because this could be step 1 of our language to be standalone
+
+	timestart := time.Now()
+
+	// check if user has provided the filepath or not
+	if len(os.Args) < 2 {
+		fmt.Println("Galti: file to do kaam karne ke liye !")
+		fmt.Println("Usage: go run main.go <filename.mo> !")
+		os.Exit(1)
+	}
+	filePath := os.Args[1]
+	fmt.Println(filepath.Ext(filePath))
+	// ensure the extension of our file is .mo
+	if filepath.Ext(filePath) != ".mo" {
+		fmt.Println("Galti: bhaya kewal .mo wale hi file supported h!")
+		os.Exit(1)
+	}
+
+	// read the file directly
+	fileBytes, err := os.ReadFile(filePath)
+	if err != nil {
+		fmt.Println("Maafi: Bhaya file khol na paaye ham!")
+		os.Exit(1)
+	}
+
+	// convert this file bytes back to string
+	fileString := string(fileBytes)
+
+	lexer := tokenise(fileString)
+
+	timss := time.Since(timestart)
+	fmt.Println(lexer)
+	fmt.Print("toal time", timss.Seconds())
+
 }
