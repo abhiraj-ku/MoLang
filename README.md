@@ -88,6 +88,16 @@ go run main.go
 At the current stage, the program prints a welcome message while the lexer,
 parser, and execution environment are being implemented.
 
+
+## Future Goals
+- [ ] AST
+- [ ] Execution logic
+- [ ] Add strict type checking
+- [ ] Support `if`/`else` statements
+- [ ] Implement operator precedence
+- [ ] Add `for` loops
+- [ ] functions `func ()`
+
 ## Project Goal
 
 MoLang is an educational project for understanding how programming languages
