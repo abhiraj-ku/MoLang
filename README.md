@@ -1,5 +1,7 @@
 # MoLang (.mo)
 
+![MoLang logo](./assets/logo.png)
+
 MoLang is a small toy programming language written from scratch in Go. Its
 syntax is inspired by simple Hindi words:
 
