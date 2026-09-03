@@ -13,6 +13,7 @@ const (
 	TokenKwPrint TokenType = "KW_PRINT" // instead of print we use "dikhao"
 	TokenId      TokenType = "ID"       // variable names
 	TokenNumber  TokenType = "NUMBER"   // numbers
+	TokenString  TokenType = "STRING"   // strings
 	TokenOp      TokenType = "OP"       // operators(+ - * /)
 	TokenAssign  TokenType = "ASSIGN"   // assignment (=)
 	TokenLParen  TokenType = "LPAREN"   // (
@@ -50,13 +51,55 @@ func tokenise(source string) []Token {
 		{TokenKwVar, regexp.MustCompile(`^yaha`)},
 		{TokenKwPrint, regexp.MustCompile(`^dikhao`)},
 		{TokenNumber, regexp.MustCompile(`^\d+(\.\d+)?`)},
+		{TokenString, regexp.MustCompile(`^"[^"\n]*"`)},
 		{TokenAssign, regexp.MustCompile(`^=`)},
 		{TokenOp, regexp.MustCompile(`^[\+\-\*/]`)},
 		{TokenLParen, regexp.MustCompile(`^\(`)},
 		{TokenRParen, regexp.MustCompile(`^\)`)},
 		{TokenId, regexp.MustCompile(`^[a-zA-Z_]\w*`)},
 	}
-	fmt.Print(defs)
+
+	var tokens []Token
+	line := 1
+
+	i := 0
+	for i < len(source) {
+		matchFound := false
+
+		// 1. check for NewLine char '\n'
+		if source[i] == '\n' {
+			tokens = append(tokens, Token{Type: TokenNewLine, Value: "\n", Line: line})
+			line++
+			i++
+			continue
+		}
+
+		// 2. skip white space in between (structural)
+		if source[i] == ' ' || source[i] == '\t' || source[i] == '\r' {
+			i++
+			continue
+		}
+
+		// 3. Now start checking the actual string chars
+		remaining := source[i:]
+		for _, def := range defs {
+			loc := def.Regex.FindStringIndex(remaining)
+			if loc != nil && loc[0] == 0 { // Match found at start only
+				matchStr := remaining[loc[0]:loc[1]]                                        // the actual matched string ( as defined in the TokenType)
+				tokens = append(tokens, Token{Type: def.Type, Value: matchStr, Line: line}) // append to tokens of type Token
+				i += len(matchStr)                                                          // move i to the next location after this match eg: yaha x = 10 so i now point at x
+				matchFound = true
+				break
+			}
+		}
+		if !matchFound {
+			panic(fmt.Sprintf("Mazak udao ge mere lang ka invalid ops kar ke!: %c at line %d", source[i], line))
+		}
+	}
+
+	tokens = append(tokens, Token{Type: TokenEOF, Value: "", Line: line})
+
+	return tokens
 
 }
 

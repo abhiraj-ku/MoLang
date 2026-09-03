@@ -1,4 +1,4 @@
-# MoLang
+# MoLang (.mo)
 
 MoLang is a small toy programming language written from scratch in Go. Its
 syntax is inspired by simple Hindi words:
