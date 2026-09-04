@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"time"
+	"strconv"
 )
 
 // THE LEXER : token converter of the prohram
@@ -104,12 +104,134 @@ func tokenise(source string) []Token {
 
 }
 
+// PARSER & AST Formation (recursive descent parsing)
+/*    Evaluating yaha distance = speed * time
+		results in
+	          VarDeclNode (yaha)
+           /         \
+   VarName: distance   Expr: BinOpNode (+)
+                             /         \
+               BinOpNode (*)             NumNode (15)
+               /          \
+       VarNode(speed)   VarNode(time)
+
+*/
+
+// Base node for all nodes type
+type Node interface{}
+
+// Print keyword node
+type PrintNode struct {
+	Expr Node
+}
+type VarDecNode struct {
+	VarName string
+	Expr    Node
+}
+
+type BinOpNode struct {
+	Left  Node
+	Op    string
+	Right Node
+}
+
+type NumNode struct {
+	Value float64
+}
+
+type VarNode struct {
+	Name string
+}
+
+type Parser struct {
+	tokens []Token
+	pos    int
+}
+
+func NewParser(tokens []Token) *Parser {
+	return &Parser{tokens: tokens, pos: 0}
+}
+
+func (p *Parser) current() Token {
+	return p.tokens[p.pos]
+}
+
+func (p *Parser) consume(tType TokenType) Token {
+	tok := p.current()
+	if tok.Type != tType {
+		panic(fmt.Sprintf("Bhai galat token nhi chalega yaha,chahiye %s par mila %s yaha par %d", tType, tok.Type, tok.Line))
+	}
+	p.pos++
+	return tok
+}
+
+// Parse function return the slice of valid tokens of type Node
+func (p *Parser) Parse() []Node {
+	var statements []Node
+
+	for p.current().Type != TokenEOF {
+		if p.current().Type == TokenNewLine {
+			p.consume(TokenNewLine)
+			continue
+		}
+		statements = append(statements, p.parseStaements())
+	}
+	return statements
+}
+
+func (p *Parser) parseStaements() Node {
+	tok := p.current()
+
+	switch tok.Type {
+	case TokenKwVar:
+		p.consume(TokenKwVar)
+		varName := p.consume(TokenId).Value
+		p.consume(TokenAssign)
+		expr := p.parseExpression()
+		return &VarDecNode{VarName: varName, Expr: expr}
+
+	case TokenKwPrint:
+		p.consume(TokenKwPrint)
+		p.consume(TokenLParen)
+		expr := p.parseExpression()
+		p.consume(TokenRParen)
+		return &PrintNode{Expr: expr}
+	default:
+		panic(fmt.Sprintf("bhaya ye mujhe na pata kya syntax h %s yaha pe %d", tok.Value, tok.Line))
+
+	}
+
+}
+
+func (p *Parser) parseExpression() Node {
+	left := p.parsePrimary()
+	for p.current().Type == TokenOp {
+		op := p.consume(TokenOp).Value
+		right := p.parsePrimary()
+		left = &BinOpNode{Left: left, Op: op, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parsePrimary() Node {
+	tok := p.current()
+	if tok.Type == TokenNumber {
+		p.consume(TokenNumber)
+		val, _ := strconv.ParseFloat(tok.Value, 64)
+		return &NumNode{Value: val}
+	} else if tok.Type == TokenId {
+		p.consume(TokenId)
+		return &VarNode{Name: tok.Value}
+	}
+	panic(fmt.Sprintf("Bhaya hame sirf number ya string do, mila '%s' yaha %d", tok.Value, tok.Line))
+}
+
 func main() {
 	fmt.Println("Welcome to the world of MoLang(.mo)")
 	// Read the file path and parse them and pass to tokenise function
 	// because this could be step 1 of our language to be standalone
 
-	timestart := time.Now()
+	// timestart := time.Now()
 
 	// check if user has provided the filepath or not
 	if len(os.Args) < 2 {
@@ -118,7 +240,6 @@ func main() {
 		os.Exit(1)
 	}
 	filePath := os.Args[1]
-	fmt.Println(filepath.Ext(filePath))
 	// ensure the extension of our file is .mo
 	if filepath.Ext(filePath) != ".mo" {
 		fmt.Println("Galti: bhaya kewal .mo wale hi file supported h!")
@@ -137,8 +258,14 @@ func main() {
 
 	lexer := tokenise(fileString)
 
-	timss := time.Since(timestart)
-	fmt.Println(lexer)
-	fmt.Print("toal time", timss.Seconds())
+	parseit := NewParser(lexer)
+	ast := parseit.Parse()
+
+	for _, node := range ast {
+		fmt.Printf("%#v\n", node)
+	}
+	// timss := time.Since(timestart)
+	// fmt.Println(lexer)
+	// fmt.Print("toal time", timss.Seconds())
 
 }
