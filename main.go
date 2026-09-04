@@ -25,13 +25,11 @@ const (
 	TokenEOF     TokenType = "EOF"      // end of line
 )
 
-// Token struct:
-/*
-  A token strutc is basically a type , value and line
-  type: TokenType
-  Value : Actual text like dikhao or yaha rakh
-  Line: this token at which line number ( to track or so)
-*/
+// 	Token struct:
+//  A token strutc is basically a type , value and line
+//  type: TokenType
+//  Value : Actual text like dikhao or yaha rakh
+//  Line: this token at which line number ( to track or so)
 
 type Token struct {
 	Type  TokenType

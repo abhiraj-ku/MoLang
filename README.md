@@ -88,6 +88,14 @@ go run main.go
 At the current stage, the program prints a welcome message while the lexer,
 parser, and execution environment are being implemented.
 
+## Current status
+
+- At this point of time , the program takes the .mo file and produces token out of it 
+
+
+
+![current status](./assets/cs.png)
+
 
 ## Future Goals
 - [ ] AST
