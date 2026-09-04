@@ -90,15 +90,15 @@ parser, and execution environment are being implemented.
 
 ## Current status
 
-- At this point of time , the program takes the .mo file and produces token out of it 
+- At this point of time , the program takes the .mo file and produces token out of it, parse it and produces AST nodes sucessfully
 
 
 
-![current status](./assets/cs.png)
+![current status](./assets/cs2.png)
 
 
 ## Future Goals
-- [ ] AST
+- [x] AST
 - [ ] Execution logic
 - [ ] Add strict type checking
 - [ ] Support `if`/`else` statements
