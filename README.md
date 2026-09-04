@@ -97,6 +97,7 @@ parser, and execution environment are being implemented.
 - [ ] Implement operator precedence
 - [ ] Add `for` loops
 - [ ] functions `func ()`
+- [ ] Syntax highlighting in VS Code
 
 ## Project Goal
 
