@@ -99,7 +99,7 @@ parser, and execution environment are being implemented.
 
 ## Future Goals
 - [x] AST
-- [ ] Execution logic
+- [x] Execution logic
 - [ ] Add strict type checking
 - [ ] Support `if`/`else` statements
 - [ ] Implement operator precedence
