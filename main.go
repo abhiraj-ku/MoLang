@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // THE LEXER : token converter of the prohram
@@ -135,6 +136,10 @@ type BinOpNode struct {
 	Right Node
 }
 
+type StringNode struct {
+	Value string
+}
+
 type NumNode struct {
 	Value float64
 }
@@ -215,15 +220,92 @@ func (p *Parser) parseExpression() Node {
 
 func (p *Parser) parsePrimary() Node {
 	tok := p.current()
-	if tok.Type == TokenNumber {
+	switch tok.Type {
+	case TokenNumber:
 		p.consume(TokenNumber)
 		val, _ := strconv.ParseFloat(tok.Value, 64)
 		return &NumNode{Value: val}
-	} else if tok.Type == TokenId {
+	case TokenString:
+		p.consume(TokenString)
+		// Strip the wrapping double quotes from the string value before saving
+		cleanVal := strings.Trim(tok.Value, "\"")
+		return &StringNode{Value: cleanVal}
+	case TokenId:
 		p.consume(TokenId)
 		return &VarNode{Name: tok.Value}
+	case TokenLParen:
+		p.consume(TokenLParen)
+		expr := p.parseExpression()
+		p.consume(TokenRParen)
+		return expr
+	default:
+		panic(fmt.Sprintf("Bhaya hame number, string, variable ya expression chahiye, mila '%s' yaha %d", tok.Value, tok.Line))
 	}
-	panic(fmt.Sprintf("Bhaya hame sirf number ya string do, mila '%s' yaha %d", tok.Value, tok.Line))
+}
+
+// Runtime  Environment (interepreter logic)
+
+// variables store the global memory of the program
+// eg: lets take a statement `yaha speed = 10*23`
+// variable["speed"] =value
+type Environment struct {
+	variables map[string]any
+}
+
+func NewEnvironment() *Environment {
+	return &Environment{variables: make(map[string]any)}
+}
+
+func (e *Environment) Execute(nodes []Node) {
+	for _, node := range nodes {
+		e.evaluate(node)
+	}
+}
+
+func (e *Environment) evaluate(node Node) any {
+	switch n := node.(type) {
+	case *NumNode:
+		return n.Value
+	case *StringNode:
+		return n.Value
+	case *VarNode:
+		val, exist := e.variables[n.Name]
+		if !exist {
+			panic(fmt.Sprintf("Runtime Error: Variable '%s' initialization dhoond nahi paye!", n.Name))
+		}
+		return val
+
+	case *VarDecNode:
+		val := e.evaluate(n.Expr)
+		e.variables[n.VarName] = val
+		fmt.Printf("Environment: %s = %v\n", n.VarName, val)
+		return val
+
+	case *PrintNode:
+		val := e.evaluate(n.Expr)
+		fmt.Println(val)
+		return val
+	case *BinOpNode:
+		leftVal := e.evaluate(n.Left).(float64)
+		rightVal := e.evaluate(n.Right).(float64)
+		switch n.Op {
+		case "+":
+			return leftVal + rightVal
+		case "-":
+			return leftVal - rightVal
+		case "*":
+			return leftVal * rightVal
+		case "/":
+			if rightVal == 0 {
+				panic("runtime error: bhai 0 se kaise divide karega satvi fail")
+			}
+			return leftVal / rightVal
+
+		}
+	default:
+		panic(fmt.Sprintf("Unknown AST node: %T", node))
+	}
+	return 0
 }
 
 func main() {
@@ -267,5 +349,7 @@ func main() {
 	// timss := time.Since(timestart)
 	// fmt.Println(lexer)
 	// fmt.Print("toal time", timss.Seconds())
+	env := NewEnvironment()
+	env.Execute(ast)
 
 }
