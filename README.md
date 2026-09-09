@@ -7,7 +7,8 @@ syntax is inspired by simple Hindi words:
 
 - `yaha` declares a variable
 - `dikhao` prints a value
-- `+`, `-`, `*`, and `/` perform basic calculations
+- `+`, `-`, `*`, and `/` perform arithmetic calculations
+- unary `+` and `-` work with numeric expressions
 
 The project is being built step by step with a custom lexer, parser, and
 execution environment. No external language framework is required.
@@ -63,6 +64,22 @@ Parentheses can be used to group calculations:
 dikhao((10 + 5) * 2)
 ```
 
+Multiplication and division have higher precedence than addition and
+subtraction:
+
+```molang
+dikhao(2 + 3 * 4) // 14
+dikhao((2 + 3) * 4) // 20
+```
+
+Unary operators can be used before numeric expressions:
+
+```molang
+dikhao(-5)
+dikhao(2 * -3)
+dikhao(--5)
+```
+
 ## How It Works
 
 MoLang is organized into these stages:
@@ -72,6 +89,10 @@ MoLang is organized into these stages:
 2. **Parser** (`parser/`): checks the token sequence and builds the AST.
 3. **Interpreter** (`interpreter/`): stores variables and evaluates statements.
 4. **AST** (`ast/`): contains the shared syntax tree node definitions.
+
+The parser uses separate precedence levels for addition/subtraction,
+multiplication/division, unary operators, and primary expressions. The
+interpreter evaluates the resulting AST recursively.
 
 The lexer currently defines token types for `yaha`, `dikhao`, identifiers,
 numbers, assignment, arithmetic operators, parentheses, new lines, and end of
@@ -88,9 +109,21 @@ go run . main.mo
 The CLI reads a `.mo` file and passes it through the lexer, parser, and
 interpreter packages.
 
-## Current status
+## Run Tests
 
-- At this point of time , the program takes the .mo file and produces token out of it, parse it and produces AST nodes sucessfully
+Automated tests cover tokenization, AST construction, operator precedence,
+unary expressions, arithmetic evaluation, and unknown variables:
+
+```bash
+go test ./...
+```
+
+## Current Status
+
+The program reads a `.mo` file, tokenizes it, parses it into an AST, and
+executes it with the interpreter. The current implementation supports numeric
+and string literals, variables, arithmetic operators, parentheses, operator
+precedence, unary numeric operators, and automated package tests.
 
 
 
@@ -100,10 +133,11 @@ interpreter packages.
 ## Future Goals
 - [x] AST
 - [x] Execution logic
-- [ ] Add automated lexer, parser, and interpreter tests
+- [x] Automated lexer, parser, and interpreter tests
 - [ ] Add strict type checking
 - [ ] Support `if`/`else` statements
-- [ ] Implement operator precedence
+- [x] Implement operator precedence
+- [x] Implement unary numeric operators
 - [ ] Add `for` loops
 - [ ] functions `func ()`
 - [ ] Syntax highlighting in VS Code

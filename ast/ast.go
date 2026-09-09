@@ -30,3 +30,9 @@ type NumberNode struct {
 type VariableNode struct {
 	Name string
 }
+
+// handles unary ops (dikhao(-2*10)-> -10)
+type UnaryOpNode struct {
+	Op      string
+	Operand Node
+}

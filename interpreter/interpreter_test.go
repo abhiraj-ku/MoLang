@@ -23,6 +23,43 @@ func TestEvaluateArithmetic(t *testing.T) {
 	}
 }
 
+func TestEvaluateUnaryOperators(t *testing.T) {
+	environment := NewEnvironment()
+
+	negative := environment.evaluate(&ast.UnaryOpNode{
+		Op:      "-",
+		Operand: &ast.NumberNode{Value: 5},
+	})
+	if negative != float64(-5) {
+		t.Fatalf("expected -5, got %v", negative)
+	}
+
+	positive := environment.evaluate(&ast.UnaryOpNode{
+		Op:      "+",
+		Operand: &ast.NumberNode{Value: 5},
+	})
+	if positive != float64(5) {
+		t.Fatalf("expected 5, got %v", positive)
+	}
+}
+
+func TestEvaluateUnaryWithArithmetic(t *testing.T) {
+	environment := NewEnvironment()
+	expression := &ast.BinaryOpNode{
+		Left: &ast.NumberNode{Value: 2},
+		Op:   "*",
+		Right: &ast.UnaryOpNode{
+			Op:      "-",
+			Operand: &ast.NumberNode{Value: 3},
+		},
+	}
+
+	result := environment.evaluate(expression)
+	if result != float64(-6) {
+		t.Fatalf("expected -6, got %v", result)
+	}
+}
+
 func TestEvaluateUnknownVariablePanics(t *testing.T) {
 	defer func() {
 		if recover() == nil {

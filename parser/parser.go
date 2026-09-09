@@ -63,13 +63,39 @@ func (p *Parser) parseStatement() ast.Node {
 }
 
 func (p *Parser) parseExpression() ast.Node {
-	left := p.parsePrimary()
-	for p.current().Type == lexer.TokenOp {
+	return p.parseTerm()
+}
+
+func (p *Parser) parseTerm() ast.Node {
+	left := p.parseFactor()
+	for p.current().Type == lexer.TokenOp && (p.current().Value == "+" || p.current().Value == "-") {
 		op := p.consume(lexer.TokenOp).Value
-		right := p.parsePrimary()
+		right := p.parseFactor()
 		left = &ast.BinaryOpNode{Left: left, Op: op, Right: right}
 	}
 	return left
+}
+
+func (p *Parser) parseFactor() ast.Node {
+	left := p.parseUnary()
+	for p.current().Type == lexer.TokenOp && (p.current().Value == "*" || p.current().Value == "/") {
+		op := p.consume(lexer.TokenOp).Value
+		right := p.parseUnary()
+		left = &ast.BinaryOpNode{Left: left, Op: op, Right: right}
+	}
+	return left
+}
+
+func (p *Parser) parseUnary() ast.Node {
+	if p.current().Type == lexer.TokenOp && (p.current().Value == "-" || p.current().Value == "+") {
+		op := p.consume(lexer.TokenOp).Value
+
+		return &ast.UnaryOpNode{
+			Op:      op,
+			Operand: p.parseUnary(),
+		}
+	}
+	return p.parsePrimary()
 }
 
 func (p *Parser) parsePrimary() ast.Node {

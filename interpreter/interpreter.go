@@ -42,6 +42,8 @@ func (e *Environment) evaluate(node ast.Node) any {
 		return value
 	case *ast.BinaryOpNode:
 		return e.evaluateBinary(current)
+	case *ast.UnaryOpNode:
+		return e.evaluateUnary(current)
 	default:
 		panic(fmt.Sprintf("unknown AST node: %T", node))
 	}
@@ -67,5 +69,21 @@ func (e *Environment) evaluateBinary(node *ast.BinaryOpNode) float64 {
 		return left / right
 	default:
 		panic(fmt.Sprintf("unknown operator %q", node.Op))
+	}
+}
+
+func (e *Environment) evaluateUnary(node *ast.UnaryOpNode) float64 {
+	value, ok := e.evaluate(node.Operand).(float64)
+	if !ok {
+		panic("unary op requier a number operand")
+	}
+
+	switch node.Op {
+	case "+":
+		return value
+	case "-":
+		return -value
+	default:
+		panic(fmt.Sprintf("unknown value h bhai %q", node.Op))
 	}
 }
