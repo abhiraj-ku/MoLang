@@ -13,6 +13,8 @@ syntax is inspired by simple Hindi words:
 The project is being built step by step with a custom lexer, parser, and
 execution environment. No external language framework is required.
 
+## Track development: [Twitter](https://x.com/abhirajabhi312)
+
 ## Example
 
 The intended MoLang syntax looks like this:
