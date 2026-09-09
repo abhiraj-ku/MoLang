@@ -14,6 +14,13 @@ type Parser struct {
 	position int
 }
 
+// Current program parsing logic derives tree in this order
+// parseExpression
+//     -> parseTerm
+//       -> parseFactor
+//            -> parseUnary
+//                -> parsePrimary
+
 func New(tokens []lexer.Token) *Parser {
 	return &Parser{tokens: tokens}
 }
