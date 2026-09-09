@@ -10,15 +10,22 @@ type TokenType string
 const (
 	TokenKwVar   TokenType = "KW_VAR"
 	TokenKwPrint TokenType = "KW_PRINT"
+	TokenKwIf    TokenType = "KW_IF"
+	TokenKwElse  TokenType = "KW_ELSE"
 	TokenId      TokenType = "ID"
 	TokenNumber  TokenType = "NUMBER"
 	TokenString  TokenType = "STRING"
+	TokenBoolean TokenType = "BOOLEAN"
+	TokenCompare TokenType = "COMPARE"
 	TokenOp      TokenType = "OP"
 	TokenAssign  TokenType = "ASSIGN"
 	TokenLParen  TokenType = "LPAREN"
 	TokenRParen  TokenType = "RPAREN"
+	TokenLBrace  TokenType = "LBRACE"
+	TokenRBrace  TokenType = "RBRACE"
 	TokenNewLine TokenType = "NEWLINE"
-	TokenEOF     TokenType = "EOF"
+
+	TokenEOF TokenType = "EOF"
 )
 
 type Token struct {
@@ -34,14 +41,22 @@ type tokenDefinition struct {
 
 func Tokenize(source string) []Token {
 	definitions := []tokenDefinition{
+		{TokenKwIf, regexp.MustCompile(`^agar\b`)},
+		{TokenKwElse, regexp.MustCompile(`^warna\b`)},
+		{TokenBoolean, regexp.MustCompile(`^(true|false)\b`)},
 		{TokenKwVar, regexp.MustCompile(`^yaha\b`)},
 		{TokenKwPrint, regexp.MustCompile(`^dikhao\b`)},
 		{TokenNumber, regexp.MustCompile(`^\d+(\.\d+)?`)},
 		{TokenString, regexp.MustCompile(`^"[^"\n]*"`)},
+
+		{TokenCompare, regexp.MustCompile(`^(==|!=|<=|>=|<|>)`)},
 		{TokenAssign, regexp.MustCompile(`^=`)},
+
 		{TokenOp, regexp.MustCompile(`^[+\-*/]`)},
 		{TokenLParen, regexp.MustCompile(`^\(`)},
 		{TokenRParen, regexp.MustCompile(`^\)`)},
+		{TokenLBrace, regexp.MustCompile(`^\{`)},
+		{TokenRBrace, regexp.MustCompile(`^\}`)},
 		{TokenId, regexp.MustCompile(`^[a-zA-Z_]\w*`)},
 	}
 
